@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1f2d3d"><title>Budżet – Moje dniówki</title>
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#eef1f4;--navy:#1f2d3d;--lime:#c6f36a;--limeL:#e0f7a8;--txt:#1f2d3d;--mut:#5b6573;--bd:#d5dbe2;--red:#a32020;--grn:#2f5a1a}
+*{box-sizing:border-box}html{font-size:19px}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Roboto,"Segoe UI",sans-serif;line-height:1.35}
+.wrap{max-width:620px;margin:0 auto;padding:14px 14px 40px}
+header{display:flex;align-items:center;gap:12px;padding:4px 0 14px;border-bottom:1px solid var(--bd)}
+.logo{width:52px;height:52px;border-radius:12px;background:var(--navy);display:grid;place-items:center}
+header h1{font-size:1.5rem;margin:0;flex:1}header small{color:var(--mut);font-size:.8rem}
+.eyebrow{letter-spacing:.12em;font-size:.75rem;font-weight:700;color:var(--mut);margin:18px 0 4px}
+.hero{font-size:1.7rem;margin:0 0 16px;font-weight:500}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.tab{min-height:64px;border:0;border-radius:14px;background:transparent;font-size:1.1rem;font-weight:700;color:var(--txt);display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer}
+.tab.on{background:var(--navy);color:#fff}
+.card{background:#fff;border-radius:22px;padding:20px;margin-bottom:16px;box-shadow:0 1px 3px #0001}
+.card h2{font-size:1.35rem;font-weight:500;margin:0 0 16px;display:flex;align-items:center;gap:10px}
+label{display:block;font-weight:700;margin:14px 0 8px}
+input{width:100%;min-height:64px;font-size:1.35rem;padding:10px 16px;border:1.5px solid var(--bd);border-radius:12px;background:#fff;color:var(--txt);font-family:inherit}
+input:focus{outline:3px solid var(--lime);border-color:var(--navy)}
+.inzl{position:relative}.inzl span{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--mut)}
+.btn{width:100%;min-height:68px;border:0;border-radius:14px;background:var(--lime);color:var(--navy);font-size:1.2rem;font-weight:700;margin-top:14px;cursor:pointer;font-family:inherit}
+.btn.sec{background:#e7ebf0}.btn.red{background:#f6d4d4;color:var(--red)}.btn:disabled{opacity:.45}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.navy{background:var(--navy);color:#fff;border-radius:18px;padding:20px;margin:14px 0}
+.navy .l{opacity:.85;font-size:.95rem}.navy .big{font-size:2.2rem;font-weight:800;margin-top:6px}
+.navy .foot{display:flex;justify-content:space-between;border-top:1px solid #ffffff33;margin-top:14px;padding-top:12px;font-size:.95rem}
+.hl{color:var(--lime);font-weight:800}
+.hint{color:var(--mut);font-size:.9rem}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);background:#eef1f4;border-radius:14px;padding:5px;gap:4px}
+.seg button{min-height:56px;border:0;background:transparent;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;color:var(--txt)}
+.seg button.on{background:#fff;box-shadow:0 1px 3px #0002}
+.pnav{display:flex;align-items:center;justify-content:space-between;margin:14px 0}
+.pnav b{text-align:center;flex:1}.icb{min-width:60px;min-height:60px;border:0;background:#f1f3f6;border-radius:12px;font-size:1.5rem;cursor:pointer;color:var(--txt)}
+.dline{display:flex;gap:12px;align-items:center}.dline input{flex:1}.link{background:none;border:0;font-size:1.1rem;font-weight:700;color:var(--grn);text-decoration:underline;cursor:pointer;min-height:56px;padding:0 8px}
+.list .it{display:flex;align-items:center;gap:8px;border-top:1px solid #e6e9ee;padding:12px 0;min-height:72px}
+.it .m{flex:1}.it .a{font-weight:800;white-space:nowrap}.it .s{color:var(--mut);font-size:.85rem}
+.plus{color:var(--grn)}.minus{color:var(--red)}
+.ib{min-width:56px;min-height:56px;border:0;border-radius:12px;background:#f1f3f6;cursor:pointer;display:grid;place-items:center}
+.ib.del{background:#fbe9e9}
+.badge{background:#eef1f4;border-radius:8px;padding:4px 10px;font-weight:700}
+.empty{background:#f5f7f9;border-radius:14px;padding:24px;text-align:center;color:var(--mut)}
+.trip{border:1.5px solid var(--bd);border-radius:18px;padding:18px;margin-top:14px}
+.trip.on{background:#f5fbe8;border-color:#8bbf4f}
+.st{display:inline-block;border-radius:8px;padding:5px 12px;font-weight:700;background:#e7ebf0}.trip.on .st{background:var(--lime)}
+.trip .sum{font-size:2rem;font-weight:800;margin:12px 0 4px}
+.tophead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pend{border:1.5px solid #8bbf4f;background:#f5fbe8;border-radius:18px;padding:16px;margin-top:12px}
+.debt{border:1.5px solid var(--bd);border-radius:18px;padding:18px;margin-top:14px}
+.debt .big{font-size:2rem;font-weight:800;margin:8px 0}
+footer{text-align:center;color:var(--mut);font-size:.85rem;margin-top:20px}
+.modal{position:fixed;inset:0;background:#0008;display:none;align-items:flex-end;justify-content:center;z-index:9}
+.modal.open{display:flex}.modal .box{background:#fff;width:100%;max-width:620px;border-radius:22px 22px 0 0;padding:22px;max-height:92vh;overflow:auto}
+.modal h3{font-size:1.35rem;margin:0 0 8px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:16px 22px;border-radius:14px;font-size:1.05rem;display:none;z-index:10;max-width:90%}
+.err{color:var(--red);font-weight:700;margin-top:8px;min-height:1em}
+details summary{cursor:pointer;font-weight:700;min-height:48px;display:flex;align-items:center}
+</style></head><body>
+<div class="wrap">
+<header><div class="logo"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#c6f36a" stroke-width="2"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 9l13-4"/><rect x="14" y="11" width="7" height="5" rx="1.5"/></svg></div><h1>Budżet</h1><small>Tylko dla Ciebie</small></header>
+<div class="eyebrow">TWOJA PRACA, TWOJE ZAROBKI</div><p class="hero">Wszystko się liczy.</p>
+<nav class="tabs">
+<button class="tab" data-t="dn">👛 Dniówki</button><button class="tab" data-t="wy">🧳 Wyjazdy</button>
+<button class="tab" data-t="os">🐷 Oszczędności</button><button class="tab" data-t="dl">🤝 Długi</button></nav>
+<main id="main"></main>
+<footer>Kwoty w złotych · tydzień od poniedziałku do niedzieli</footer>
+</div>
+<div class="modal" id="modal"><div class="box" id="mbox"></div></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="file" accept=".json,application/json" hidden>
+<script>
+const KEY='moje-dniowki-v1';
+const $=s=>document.querySelector(s);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const r2=x=>Math.round(x*100)/100;
+const zl=x=>(x<0?'-':'')+Math.abs(r2(x)).toFixed(2).replace('.',',')+' zł';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// dictation-friendly: "12,50", "12.50 zł", "1 200", "12 zł 50 gr", "minus 5"
+function num(v){if(v==null)return NaN;let s=String(v).toLowerCase().trim();if(!s)return NaN;
+ let m=s.match(/^(\d[\d\s]*)\s*(zł|zl|złotych|złote|złoty)\s*(?:i\s*)?(\d{1,2})\s*(gr|groszy|grosze)?$/);if(m)return r2(+m[1].replace(/\s/g,'')+ +m[3]/100);
+ s=s.replace(/złotych|złote|złoty|zł|zl|pln|gr/g,'').replace(/\s|\u00a0/g,'').replace(/przecinek/g,',');
+ if(/,/.test(s)){s=s.replace(/\./g,'').replace(',','.')}
+ if(!/^\d*\.?\d+$/.test(s))return NaN;return r2(parseFloat(s));}
+const MG=['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
+const MN=['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+const pd=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const today=()=>iso(new Date());
+const dl=s=>{const d=pd(s);return d.getDate()+' '+MG[d.getMonth()]+' '+d.getFullYear()};
+const dshort=s=>s.split('-').reverse().join('.');
+const cap=s=>s[0].toUpperCase()+s.slice(1);
+
+function seed(){return {v:1,days:{},trips:[],processed:{},sav:[],debts:[]}}
+let S;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||!S.days){S=seed();save()}
+function save(){localStorage.setItem(KEY,JSON.stringify(S))}
+let ui={tab:localStorage.getItem(KEY+'-tab')||'dn',per:'m',ref:today(),addDate:today(),pend:{}};
+
+const savBal=()=>r2(S.sav.reduce((a,e)=>a+(e.type==='wydatek'?-e.amount:e.amount),0));
+const debtLeft=d=>r2(d.amount-d.payments.reduce((a,p)=>a+p.amount,0));
+const tripDays=t=>Object.keys(S.days).filter(d=>d>=t.start&&(!t.end||d<=t.end));
+const activeTrip=()=>S.trips.find(t=>!t.end);
+const pending=()=>Object.keys(S.days).sort().reverse().map(d=>({d,diff:r2(S.days[d]-(S.processed[d]||0))})).filter(x=>x.diff>0);
+
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2600)}
+function modal(html){$('#mbox').innerHTML=html;$('#modal').classList.add('open');const f=$('#mbox input');if(f)setTimeout(()=>f.focus(),50)}
+function close(){$('#modal').classList.remove('open')}
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')close()});
+function confirmBox(msg,fn,ok='Tak, usuń'){modal(`<h3>${esc(msg)}</h3><p class="hint">Tej operacji nie można cofnąć.</p><div class="row2"><button class="btn sec" id="mNo">Anuluj</button><button class="btn red" id="mYes">${ok}</button></div>`);
+ $('#mNo').onclick=close;$('#mYes').onclick=()=>{close();fn();save();render()}}
+// form: fields [{k,label,type:'money'|'date'|'text',v,opt}]
+function form(title,fields,onOk,onDel){modal(`<h3>${esc(title)}</h3>${fields.map(f=>`<label>${esc(f.label)}</label>${f.type==='date'?`<input type="date" id="f_${f.k}" value="${f.v||''}">`:f.type==='money'?`<div class="inzl"><input inputmode="decimal" id="f_${f.k}" value="${f.v!=null&&f.v!==''?String(f.v).replace('.',','):''}" placeholder="0,00"><span>zł</span></div>`:`<input id="f_${f.k}" value="${esc(f.v||'')}" placeholder="${esc(f.ph||'')}">`}`).join('')}
+ <div class="err" id="mErr"></div><div class="row2"><button class="btn sec" id="mNo">Anuluj</button><button class="btn" id="mOk">Zapisz</button></div>${onDel?'<button class="btn red" id="mDel">🗑 Usuń</button>':''}`);
+ $('#mNo').onclick=close;if(onDel)$('#mDel').onclick=onDel;
+ $('#mOk').onclick=()=>{const o={};for(const f of fields){const v=$('#f_'+f.k).value;
+  if(f.type==='money'){o[f.k]=num(v);if(isNaN(o[f.k])||(o[f.k]<=0&&!f.zero)){$('#mErr').textContent='Podaj poprawną kwotę, np. 12,50';return}}
+  else if(f.type==='date'){if(!v&&!f.opt){$('#mErr').textContent='Wybierz datę';return}o[f.k]=v||null}
+  else{if(!v.trim()&&!f.opt){$('#mErr').textContent='Uzupełnij pole: '+f.label;return}o[f.k]=v.trim()}}
+  const e=onOk(o);if(e){$('#mErr').textContent=e;return}close();save();render()}}
+const pen='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1f2d3d" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>';
+const bin='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#a32020" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>';
+
+// ---------- Dniówki
+function period(){const r=pd(ui.ref);let a,b,lab;
+ if(ui.per==='d'){a=b=ui.ref;lab=cap(dl(ui.ref))}
+ else if(ui.per==='w'){const d=new Date(r);d.setDate(d.getDate()-((d.getDay()+6)%7));a=iso(d);d.setDate(d.getDate()+6);b=iso(d);lab=cap(dl(a))+' – '+cap(dl(b))}
+ else if(ui.per==='m'){a=iso(new Date(r.getFullYear(),r.getMonth(),1));b=iso(new Date(r.getFullYear(),r.getMonth()+1,0));lab=MN[r.getMonth()]+' '+r.getFullYear()}
+ else{a=r.getFullYear()+'-01-01';b=r.getFullYear()+'-12-31';lab=''+r.getFullYear()}return{a,b,lab}}
+function shift(n){const d=pd(ui.ref);if(ui.per==='d')d.setDate(d.getDate()+n);else if(ui.per==='w')d.setDate(d.getDate()+7*n);else if(ui.per==='m'){d.setDate(1);d.setMonth(d.getMonth()+n)}else d.setFullYear(d.getFullYear()+n);ui.ref=iso(d);render()}
+function vDn(){const p=period(),ds=Object.keys(S.days).filter(d=>d>=p.a&&d<=p.b).sort().reverse(),tot=r2(ds.reduce((a,d)=>a+S.days[d],0)),t=activeTrip();
+ return `<section class="card"><h2>＋ Dodawaj do dniówki</h2><label for="addDate">Dzień pracy</label><input type="date" id="addDate" value="${ui.addDate}">
+ <label for="addAmt">Kolejna kwota (zł)</label><div class="inzl"><input id="addAmt" inputmode="decimal" placeholder="0,00" autocomplete="off"><span>zł</span></div>
+ <div class="navy"><div class="l">Suma tego dnia</div><div class="big" id="daySum">${zl(S.days[ui.addDate]||0)}</div></div>
+ <p class="hint">Wpisuj kolejne kwoty. Dodają się do jednej dniówki, bez listy pojedynczych rozliczeń. Możesz dyktować, np. „250,50”.</p>
+ <div class="err" id="addErr"></div><button class="btn" id="addBtn">✓ Dodaj do sumy</button>
+ ${t?`<hr style="border:0;border-top:1px solid #e6e9ee;margin:20px 0 10px"><b>🧳 Jesteś na wyjeździe</b><p class="hint" style="margin:6px 0">Od ${dl(t.start)} · ${zl(tripDays(t).reduce((a,d)=>a+S.days[d],0))}</p><button class="link" data-go="wy">Zobacz rozliczenie</button>`:''}</section>
+ <section class="card"><h2>📅 Podsumowanie</h2><div class="seg">${[['d','Dzień'],['w','Tydzień'],['m','Miesiąc'],['y','Rok']].map(([k,l])=>`<button data-per="${k}" class="${ui.per===k?'on':''}">${l}</button>`).join('')}</div>
+ <div class="pnav"><button class="icb" data-sh="-1" aria-label="Poprzedni">‹</button><b>${p.lab}</b><button class="icb" data-sh="1" aria-label="Następny">›</button></div>
+ <div class="dline"><input type="date" id="refDate" value="${ui.ref}"><button class="link" id="todayBtn">Dzisiaj</button></div>
+ <div class="navy"><div class="l">Łączne zarobki</div><div class="big" id="perTot">${zl(tot)}</div><div class="foot"><span><span class="hl">${ds.length}</span> zapisanych dniówek</span><span>Średnio <span class="hl">${zl(ds.length?tot/ds.length:0)}</span></span></div></div>
+ <div class="tophead"><span>Dniówki w tym okresie</span><span class="badge">${ds.length}</span></div>
+ <div class="list">${ds.length?ds.map(d=>`<div class="it"><div class="m">${dl(d)}</div><div class="a">${zl(S.days[d])}</div><button class="ib" data-ed="${d}" aria-label="Edytuj">${pen}</button><button class="ib del" data-dd="${d}" aria-label="Usuń">${bin}</button></div>`).join(''):'<div class="empty"><b>Jeszcze bez dniówek.</b><br>Zapisz kwotę, a pojawi się tutaj.</div>'}</div></section>`}
+function bindDn(){$('#addDate').onchange=e=>{ui.addDate=e.target.value||today();$('#daySum').textContent=zl(S.days[ui.addDate]||0)};
+ const add=()=>{const v=num($('#addAmt').value);if(isNaN(v)||v<0){$('#addErr').textContent='Podaj poprawną kwotę, np. 12,50';return}
+  S.days[ui.addDate]=r2((S.days[ui.addDate]||0)+v);save();toast('Dodano '+zl(v)+' do dniówki z '+dshort(ui.addDate));render()};
+ $('#addBtn').onclick=add;$('#addAmt').onkeydown=e=>{if(e.key==='Enter')add()};
+ document.querySelectorAll('[data-per]').forEach(b=>b.onclick=()=>{ui.per=b.dataset.per;render()});
+ document.querySelectorAll('[data-sh]').forEach(b=>b.onclick=()=>shift(+b.dataset.sh));
+ $('#refDate').onchange=e=>{ui.ref=e.target.value||today();render()};$('#todayBtn').onclick=()=>{ui.ref=today();render()};
+ document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{const d=b.dataset.ed;
+  form('Edytuj dniówkę',[{k:'date',label:'Dzień pracy',type:'date',v:d},{k:'amount',label:'Kwota dniówki (zł)',type:'money',v:S.days[d],zero:1}],o=>{
+   if(o.date!==d&&S.days[o.date]!=null)return 'W tym dniu jest już dniówka – edytuj tamtą.';
+   if(o.date!==d){delete S.days[d];if(S.processed[d]!=null){S.processed[o.date]=S.processed[d];delete S.processed[d]}S.sav.forEach(e=>{if(e.ref===d)e.ref=o.date})}
+   S.days[o.date]=o.amount},()=>delDay(d))});
+ document.querySelectorAll('[data-dd]').forEach(b=>b.onclick=()=>delDay(b.dataset.dd))}
+function delDay(d){confirmBox('Usunąć dniówkę z '+dl(d)+' ('+zl(S.days[d])+')?',()=>{delete S.days[d];delete S.processed[d];toast('Usunięto dniówkę')})}
+
+// ---------- Wyjazdy
+function vWy(){const ts=[...S.trips].sort((a,b)=>(!a.end?-1:!b.end?1:b.start.localeCompare(a.start))),act=activeTrip();
+ return `<section class="card"><h2>🧳 Moje wyjazdy</h2><button class="btn" id="arrive" ${act?'disabled':''}>＋ Przyjechałam do pracy</button>
+ <p class="hint">Rozliczenie obejmuje dniówki od dnia przyjazdu do dnia wyjazdu włącznie.</p>
+ ${ts.length?ts.map(t=>{const ds=tripDays(t),s=ds.reduce((a,d)=>a+S.days[d],0);return `<div class="trip ${t.end?'':'on'}"><div class="tophead"><span class="st">${t.end?'Zakończony':'W trakcie'}</span><span style="display:flex;gap:8px"><button class="ib" data-te="${t.id}" aria-label="Edytuj">${pen}</button><button class="ib del" data-td="${t.id}" aria-label="Usuń">${bin}</button></span></div>
+ <div style="margin-top:12px;font-size:1.1rem">${dl(t.start)}</div><div class="hint">${t.end?'do '+dl(t.end):'do dnia wyjazdu'}</div><div class="sum">${zl(s)}</div><div class="hint">${ds.length} zapisanych dniówek</div>
+ ${t.end?'':`<button class="btn" data-leave="${t.id}">Wyjeżdżam z pracy</button>`}</div>`}).join(''):'<div class="empty">Brak wyjazdów.</div>'}</section>`}
+function bindWy(){const b=$('#arrive');if(b)b.onclick=()=>form('Przyjechałam do pracy',[{k:'start',label:'Dzień przyjazdu',type:'date',v:today()}],o=>{S.trips.push({id:uid(),start:o.start,end:null})});
+ document.querySelectorAll('[data-leave]').forEach(b=>b.onclick=()=>{const t=S.trips.find(x=>x.id===b.dataset.leave);
+  form('Wyjeżdżam z pracy',[{k:'end',label:'Dzień wyjazdu',type:'date',v:today()}],o=>{if(o.end<t.start)return 'Wyjazd nie może być przed przyjazdem';t.end=o.end})});
+ document.querySelectorAll('[data-te]').forEach(b=>b.onclick=()=>{const t=S.trips.find(x=>x.id===b.dataset.te);
+  form('Edytuj wyjazd',[{k:'start',label:'Dzień przyjazdu',type:'date',v:t.start},{k:'end',label:'Dzień wyjazdu (puste = w trakcie)',type:'date',v:t.end,opt:1}],o=>{
+   if(o.end&&o.end<o.start)return 'Wyjazd nie może być przed przyjazdem';if(!o.end&&S.trips.some(x=>x!==t&&!x.end))return 'Inny wyjazd jest już w trakcie';t.start=o.start;t.end=o.end},()=>delTrip(t))});
+ document.querySelectorAll('[data-td]').forEach(b=>b.onclick=()=>delTrip(S.trips.find(x=>x.id===b.dataset.td)))}
+function delTrip(t){confirmBox('Usunąć wyjazd od '+dl(t.start)+'? Dniówki zostaną.',()=>{S.trips=S.trips.filter(x=>x!==t);toast('Usunięto wyjazd')})}
+
+// ---------- Oszczędności
+function vOs(){const pe=pending(),ex=S.sav.filter(e=>e.type!=='dniowka').sort((a,b)=>b.date.localeCompare(a.date)),dn=S.sav.filter(e=>e.type==='dniowka').sort((a,b)=>b.date.localeCompare(a.date));
+ const it=e=>`<div class="it"><div class="m">${esc(e.desc||(e.type==='wydatek'?'Wydatek':'Wpłata'))}<div class="s">${dshort(e.date)} · ${e.type==='wydatek'?'Wydatek':e.type==='dniowka'?'Z dniówki':e.type==='start'?'Stan przeniesiony':'Wpłata'}</div></div><div class="a ${e.type==='wydatek'?'minus':'plus'}">${e.type==='wydatek'?'-':'+'}${zl(e.amount)}</div><button class="ib" data-se="${e.id}" aria-label="Edytuj">${pen}</button><button class="ib del" data-sd="${e.id}" aria-label="Usuń">${bin}</button></div>`;
+ return `<section class="card"><h2>🐷 Oszczędności</h2><div class="navy"><div class="l">Odłożona kwota</div><div class="big" id="savBal">${zl(savBal())}</div></div>
+ <b>Do przelania · 25% dniówki</b><p class="hint">Przelej wyliczoną kwotę na konto oszczędnościowe, a potem wybierz „Wpłaciłam”. Kwotę możesz poprawić przed zapisaniem. Kwota aktualizuje się po dopisaniu zarobków. Wcześniej potwierdzone lub pominięte kwoty nie są naliczane ponownie.</p>
+ ${pe.length?pe.map(x=>{const v=ui.pend[x.d]??r2(x.diff*.25);return `<div class="pend"><b>Dniówka z ${dl(x.d)}</b><div class="hint">${S.processed[x.d]?'Dopisane: '+zl(x.diff)+' (dniówka '+zl(S.days[x.d])+')':'Dniówka: '+zl(x.diff)}</div>
+  <label>Do przelania (zł)</label><div class="inzl"><input inputmode="decimal" data-pv="${x.d}" value="${String(v.toFixed?v.toFixed(2):v).replace('.',',')}"><span>zł</span></div>
+  <div class="row2"><button class="btn sec" data-skip="${x.d}">Nie wpłaciłam</button><button class="btn" data-paid="${x.d}">✓ Wpłaciłam</button></div></div>`}).join(''):'<div class="empty">Wszystkie dniówki rozpatrzone.</div>'}</section>
+ <section class="card"><h2>＋ Dodatkowa wpłata</h2><label>Kwota (zł)</label><div class="inzl"><input id="dwA" inputmode="decimal" placeholder="0,00"><span>zł</span></div><label>Opis (opcjonalnie)</label><input id="dwD" placeholder="Skąd dodatkowa wpłata?"><div class="err" id="dwE"></div><button class="btn" id="dwB">✓ Dodaj wpłatę</button></section>
+ <section class="card"><h2>💸 Wydałam z oszczędności</h2><label>Kwota (zł)</label><div class="inzl"><input id="wyA" inputmode="decimal" placeholder="0,00"><span>zł</span></div><label>Na co?</label><input id="wyD" placeholder="Na co wydałaś?"><div class="err" id="wyE"></div><button class="btn" id="wyB">✓ Zapisz wydatek</button></section>
+ <section class="card"><h2>Dodatkowe wpłaty i wydatki</h2><p class="hint">Wpłaty z dniówek zwiększają tylko sumę oszczędności.</p><div class="list">${ex.length?ex.map(it).join(''):'<div class="empty">Brak wpisów.</div>'}</div>
+ <details style="margin-top:12px"><summary>Wpłaty z dniówek (${dn.length})</summary><div class="list">${dn.map(it).join('')||'<div class="empty">Brak.</div>'}</div></details></section>
+ <section class="card"><h2>💾 Kopia zapasowa</h2><p class="hint">Dane są tylko na tym telefonie. Rób kopię co tydzień. Ostatnia kopia: ${localStorage.getItem(KEY+'-backup')?dshort(localStorage.getItem(KEY+'-backup')):'nigdy'}.</p><button class="btn" id="expB">💾 Zrób kopię</button><button class="btn sec" id="impB">⬆ Importuj kopię</button></section>`}
+function bindOs(){document.querySelectorAll('[data-pv]').forEach(i=>i.oninput=()=>ui.pend[i.dataset.pv]=i.value);
+ document.querySelectorAll('[data-paid]').forEach(b=>b.onclick=()=>{const d=b.dataset.paid,v=num(document.querySelector(`[data-pv="${d}"]`).value);
+  if(isNaN(v)||v<0){toast('Podaj poprawną kwotę');return}if(v>0)S.sav.push({id:uid(),type:'dniowka',date:today(),ref:d,amount:v,desc:'25% dniówki z '+dshort(d)});
+  S.processed[d]=S.days[d];delete ui.pend[d];save();toast('Wpłacono '+zl(v));render()});
+ document.querySelectorAll('[data-skip]').forEach(b=>b.onclick=()=>{const d=b.dataset.skip;S.processed[d]=S.days[d];delete ui.pend[d];save();toast('Pominięto');render()});
+ const addE=(type,a,dsc,er,def)=>{const v=num($(a).value);if(isNaN(v)||v<=0){$(er).textContent='Podaj poprawną kwotę, np. 12,50';return}
+  const ds=$(dsc).value.trim();if(type==='wydatek'&&!ds){$(er).textContent='Napisz, na co wydałaś';return}
+  S.sav.push({id:uid(),type,date:today(),amount:v,desc:ds||def});save();toast('Zapisano');render()};
+ $('#dwB').onclick=()=>addE('wplata','#dwA','#dwD','#dwE','Dodatkowa wpłata');$('#wyB').onclick=()=>addE('wydatek','#wyA','#wyD','#wyE');
+ document.querySelectorAll('[data-se]').forEach(b=>b.onclick=()=>{const e=S.sav.find(x=>x.id===b.dataset.se);
+  form('Edytuj wpis',[{k:'amount',label:'Kwota (zł)',type:'money',v:e.amount},{k:'desc',label:'Opis',type:'text',v:e.desc,opt:e.type!=='wydatek'},{k:'date',label:'Data',type:'date',v:e.date}],o=>{Object.assign(e,o);if(!e.desc)e.desc='Dodatkowa wpłata'},()=>delSav(e))});
+ document.querySelectorAll('[data-sd]').forEach(b=>b.onclick=()=>delSav(S.sav.find(x=>x.id===b.dataset.sd)));
+ $('#expB').onclick=exportData;$('#impB').onclick=()=>$('#file').click()}
+function delSav(e){confirmBox('Usunąć wpis „'+(e.desc||'')+'” ('+zl(e.amount)+')?',()=>{S.sav=S.sav.filter(x=>x!==e);toast('Usunięto wpis')})}
+async function exportData(){const name='moje-dniowki-kopia-'+today()+'.json',txt=JSON.stringify({app:'moje-dniowki',exported:new Date().toISOString(),data:S},null,2);
+ const done=()=>{localStorage.setItem(KEY+'-backup',today());render()};
+ try{const f=new File([txt],name,{type:'application/json'});
+  if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Kopia – Moje dniówki',text:'Kopia zapasowa '+today()});done();toast('Kopia udostępniona');return}}
+ catch(e){if(e&&e.name==='AbortError'){toast('Anulowano – kopia nie została zapisana');return}}
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();a.remove();done();toast('Zapisano plik kopii')}
+function backupDue(){const l=localStorage.getItem(KEY+'-backup');return !l||(pd(today())-pd(l))/864e5>7}
+function vBanner(){if(!backupDue())return '';const l=localStorage.getItem(KEY+'-backup');
+ return `<section class="card" id="bkBanner" style="background:#fff8d6;border:2px solid #e8c547"><h2>💾 Czas na kopię!</h2><p style="margin:0">${l?'Ostatnia kopia: '+dshort(l)+'. Minął ponad tydzień.':'Nie masz jeszcze kopii zapasowej.'} Zapisz ją np. na Dysku Google – to chwila.</p><button class="btn" id="bkNow">💾 Zrób kopię teraz</button></section>`}
+$('#file').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const j=JSON.parse(await f.text()),d=j.data||j;
+ if(!d.days||!d.sav||!d.debts||!d.trips)throw 0;confirmBox('Zastąpić obecne dane kopią z pliku?',()=>{S=d;S.processed=S.processed||{};toast('Wczytano kopię')},'Tak, wczytaj')}catch(_){toast('To nie jest poprawny plik kopii')}};
+
+// ---------- Długi
+function vDl(){const tot=r2(S.debts.reduce((a,d)=>a+debtLeft(d),0));
+ return `<section class="card"><h2>＋ Dodaj dług</h2><label>Osoba</label><input id="dP" placeholder="Komu mam oddać?"><label>Kwota długu (zł)</label><div class="inzl"><input id="dA" inputmode="decimal" placeholder="0,00"><span>zł</span></div><div class="err" id="dE"></div><button class="btn" id="dB">＋ Dodaj dług</button></section>
+ <section class="card"><h2>🤝 Długi do spłaty</h2><div class="navy"><div class="l">Łącznie pozostało</div><div class="big" id="debtTot">${zl(tot)}</div></div><p class="hint">Po spłacie całej kwoty dług znika.</p>
+ ${S.debts.length?S.debts.map(d=>{const p=r2(d.payments.reduce((a,x)=>a+x.amount,0));return `<div class="debt"><div class="tophead"><b style="font-size:1.15rem">${esc(d.person)}</b><span style="display:flex;gap:8px"><button class="ib" data-de="${d.id}" aria-label="Edytuj">${pen}</button><button class="ib del" data-ddel="${d.id}" aria-label="Usuń">${bin}</button></span></div>
+ <div class="big">${zl(debtLeft(d))}</div><div class="hint">Pozostało do spłaty</div><div class="hint">Dług: ${zl(d.amount)} · Wpłacono: ${zl(p)}</div>
+ ${d.payments.length?`<div class="list" style="margin-top:8px">${d.payments.map(x=>`<div class="it"><div class="m">Wpłata<div class="s">${dshort(x.date)}</div></div><div class="a">${zl(x.amount)}</div><button class="ib" data-pe="${d.id}|${x.id}" aria-label="Edytuj">${pen}</button><button class="ib del" data-pd="${d.id}|${x.id}" aria-label="Usuń">${bin}</button></div>`).join('')}</div>`:''}
+ <label>Wpłata (zł)</label><div class="inzl"><input inputmode="decimal" placeholder="0,00" data-pin="${d.id}"><span>zł</span></div><button class="btn" data-pay="${d.id}">✓ Zapisz wpłatę</button></div>`}).join(''):'<div class="empty">Brak długów 🎉</div>'}</section>`}
+function bindDl(){const fd=id=>S.debts.find(x=>x.id===id),clean=()=>{const n=S.debts.length;S.debts=S.debts.filter(d=>debtLeft(d)>0);if(S.debts.length<n)toast('Dług spłacony – znika z listy')};
+ $('#dB').onclick=()=>{const p=$('#dP').value.trim(),v=num($('#dA').value);if(!p){$('#dE').textContent='Wpisz, komu masz oddać';return}if(isNaN(v)||v<=0){$('#dE').textContent='Podaj poprawną kwotę';return}
+  S.debts.push({id:uid(),person:p,amount:v,payments:[]});save();toast('Dodano dług');render()};
+ document.querySelectorAll('[data-pay]').forEach(b=>b.onclick=()=>{const d=fd(b.dataset.pay),v=num(document.querySelector(`[data-pin="${d.id}"]`).value);
+  if(isNaN(v)||v<=0){toast('Podaj poprawną kwotę');return}const go=()=>{d.payments.push({id:uid(),date:today(),amount:Math.min(v,debtLeft(d))});clean();save();render()};
+  if(v>=debtLeft(d))confirmBox('To spłaca cały dług wobec '+d.person+'. Dług zniknie z listy. Kontynuować?',go,'Tak, spłacony');else{go();toast('Zapisano wpłatę '+zl(v))}});
+ document.querySelectorAll('[data-de]').forEach(b=>b.onclick=()=>{const d=fd(b.dataset.de);
+  form('Edytuj dług',[{k:'person',label:'Osoba',type:'text',v:d.person},{k:'amount',label:'Kwota długu (zł)',type:'money',v:d.amount}],o=>{Object.assign(d,o);clean()},()=>delDebt(d))});
+ document.querySelectorAll('[data-ddel]').forEach(b=>b.onclick=()=>delDebt(fd(b.dataset.ddel)));
+ document.querySelectorAll('[data-pe]').forEach(b=>b.onclick=()=>{const[di,pi]=b.dataset.pe.split('|'),d=fd(di),p=d.payments.find(x=>x.id===pi);
+  form('Edytuj wpłatę',[{k:'amount',label:'Kwota (zł)',type:'money',v:p.amount},{k:'date',label:'Data',type:'date',v:p.date}],o=>{Object.assign(p,o);clean()},()=>delPay(d,p))});
+ document.querySelectorAll('[data-pd]').forEach(b=>{const[di,pi]=b.dataset.pd.split('|'),d=fd(di);b.onclick=()=>delPay(d,d.payments.find(x=>x.id===pi))})}
+function delDebt(d){confirmBox('Usunąć dług wobec '+d.person+' ('+zl(debtLeft(d))+')?',()=>{S.debts=S.debts.filter(x=>x!==d);toast('Usunięto dług')})}
+function delPay(d,p){confirmBox('Usunąć wpłatę '+zl(p.amount)+'?',()=>{d.payments=d.payments.filter(x=>x!==p);toast('Usunięto wpłatę')})}
+
+function render(){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===ui.tab));
+ const V={dn:[vDn,bindDn],wy:[vWy,bindWy],os:[vOs,bindOs],dl:[vDl,bindDl]}[ui.tab];$('#main').innerHTML=vBanner()+V[0]();V[1]();const bk=$('#bkNow');if(bk)bk.onclick=exportData;
+ document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go))}
+function go(t){ui.tab=t;localStorage.setItem(KEY+'-tab',t);render();scrollTo(0,0)}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>go(b.dataset.t));
+render();
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script></body></html>
