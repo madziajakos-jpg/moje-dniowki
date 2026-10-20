@@ -186,7 +186,7 @@ function vOs(){const pe=pending(),ex=S.sav.filter(e=>e.type!=='dniowka').sort((a
  <section class="card"><h2>💸 Wydałam z oszczędności</h2><label>Kwota (zł)</label><div class="inzl"><input id="wyA" inputmode="decimal" placeholder="0,00"><span>zł</span></div><label>Na co?</label><input id="wyD" placeholder="Na co wydałaś?"><div class="err" id="wyE"></div><button class="btn" id="wyB">✓ Zapisz wydatek</button></section>
  <section class="card"><h2>Dodatkowe wpłaty i wydatki</h2><p class="hint">Wpłaty z dniówek zwiększają tylko sumę oszczędności.</p><div class="list">${ex.length?ex.map(it).join(''):'<div class="empty">Brak wpisów.</div>'}</div>
  <details style="margin-top:12px"><summary>Wpłaty z dniówek (${dn.length})</summary><div class="list">${dn.map(it).join('')||'<div class="empty">Brak.</div>'}</div></details></section>
- <section class="card"><h2>💾 Kopia zapasowa</h2><p class="hint">Dane są tylko na tym telefonie. Rób kopię co tydzień. Ostatnia kopia: ${localStorage.getItem(KEY+'-backup')?dshort(localStorage.getItem(KEY+'-backup')):'nigdy'}.</p><button class="btn" id="expB">💾 Zrób kopię</button><button class="btn sec" id="impB">⬆ Importuj kopię</button></section>`}
+ <section class="card"><h2>💾 Kopia zapasowa</h2><p class="hint">Dane są tylko na tym telefonie. Rób kopię co tydzień.</p>${(()=>{const l=localStorage.getItem(KEY+'-backup');return `<p class="hint" id="bkNote" style="${backupDue()?'color:#8a6d00':''}">${l?'Ostatnia kopia: '+dshort(l)+(backupDue()?' – dawno nie było kopii.':''):'Dawno nie było kopii – jeszcze ani razu.'}</p>`})()}<button class="btn" id="expB">💾 Zrób kopię</button><button class="btn sec" id="impB">⬆ Importuj kopię</button></section>`}
 function bindOs(){document.querySelectorAll('[data-pv]').forEach(i=>i.oninput=()=>ui.pend[i.dataset.pv]=i.value);
  document.querySelectorAll('[data-paid]').forEach(b=>b.onclick=()=>{const d=b.dataset.paid,v=num(document.querySelector(`[data-pv="${d}"]`).value);
   if(isNaN(v)||v<0){toast('Podaj poprawną kwotę');return}if(v>0)S.sav.push({id:uid(),type:'dniowka',date:today(),ref:d,amount:v,desc:'25% dniówki z '+dshort(d)});
@@ -208,8 +208,6 @@ async function exportData(){const name='moje-dniowki-kopia-'+today()+'.json',txt
  catch(e){if(e&&e.name==='AbortError'){toast('Anulowano – kopia nie została zapisana');return}}
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();a.remove();done();toast('Zapisano plik kopii')}
 function backupDue(){const l=localStorage.getItem(KEY+'-backup');return !l||(pd(today())-pd(l))/864e5>7}
-function vBanner(){if(!backupDue())return '';const l=localStorage.getItem(KEY+'-backup');
- return `<section class="card" id="bkBanner" style="background:#fff8d6;border:2px solid #e8c547"><h2>💾 Czas na kopię!</h2><p style="margin:0">${l?'Ostatnia kopia: '+dshort(l)+'. Minął ponad tydzień.':'Nie masz jeszcze kopii zapasowej.'} Zapisz ją np. na Dysku Google – to chwila.</p><button class="btn" id="bkNow">💾 Zrób kopię teraz</button></section>`}
 $('#file').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const j=JSON.parse(await f.text()),d=j.data||j;
  if(!d.days||!d.sav||!d.debts||!d.trips)throw 0;confirmBox('Zastąpić obecne dane kopią z pliku?',()=>{S=d;S.processed=S.processed||{};toast('Wczytano kopię')},'Tak, wczytaj')}catch(_){toast('To nie jest poprawny plik kopii')}};
 
@@ -237,10 +235,10 @@ function delDebt(d){confirmBox('Usunąć dług wobec '+d.person+' ('+zl(debtLeft
 function delPay(d,p){confirmBox('Usunąć wpłatę '+zl(p.amount)+'?',()=>{d.payments=d.payments.filter(x=>x!==p);toast('Usunięto wpłatę')})}
 
 function render(){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===ui.tab));
- const V={dn:[vDn,bindDn],wy:[vWy,bindWy],os:[vOs,bindOs],dl:[vDl,bindDl]}[ui.tab];$('#main').innerHTML=vBanner()+V[0]();V[1]();const bk=$('#bkNow');if(bk)bk.onclick=exportData;
+ const V={dn:[vDn,bindDn],wy:[vWy,bindWy],os:[vOs,bindOs],dl:[vDl,bindDl]}[ui.tab];$('#main').innerHTML=V[0]();V[1]();
  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go))}
 function go(t){ui.tab=t;localStorage.setItem(KEY+'-tab',t);render();scrollTo(0,0)}
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>go(b.dataset.t));
 render();
-if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker'in navigator&&location.protocol.startsWith('http')){let had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had)location.reload();had=true});navigator.serviceWorker.register('sw.js').catch(()=>{})}
 </script></body></html>
