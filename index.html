@@ -97,7 +97,7 @@ function seed(){return {v:1,days:{},trips:[],processed:{},sav:[],debts:[]}}
 let S;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!S.days){S=seed();save()}
 function save(){localStorage.setItem(KEY,JSON.stringify(S))}
-let ui={tab:localStorage.getItem(KEY+'-tab')||'dn',per:'m',ref:today(),addDate:today(),pend:{}};
+let ui={tab:localStorage.getItem(KEY+'-tab')||'dn',per:'m',ref:today(),addDate:today(),pend:{},pendAll:null};
 
 const savBal=()=>r2(S.sav.reduce((a,e)=>a+(e.type==='wydatek'?-e.amount:e.amount),0));
 const debtLeft=d=>r2(d.amount-d.payments.reduce((a,p)=>a+p.amount,0));
@@ -153,7 +153,7 @@ function bindDn(){$('#addDate').onchange=e=>{ui.addDate=e.target.value||today();
  document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{const d=b.dataset.ed;
   form('Edytuj dniówkę',[{k:'date',label:'Dzień pracy',type:'date',v:d},{k:'amount',label:'Kwota dniówki (zł)',type:'money',v:S.days[d],zero:1}],o=>{
    if(o.date!==d&&S.days[o.date]!=null)return 'W tym dniu jest już dniówka – edytuj tamtą.';
-   if(o.date!==d){delete S.days[d];if(S.processed[d]!=null){S.processed[o.date]=S.processed[d];delete S.processed[d]}S.sav.forEach(e=>{if(e.ref===d)e.ref=o.date})}
+   if(o.date!==d){delete S.days[d];if(S.processed[d]!=null){S.processed[o.date]=S.processed[d];delete S.processed[d]}S.sav.forEach(e=>{if(e.ref===d)e.ref=o.date;if(e.refs)e.refs=e.refs.map(r=>r===d?o.date:r)})}
    S.days[o.date]=o.amount},()=>delDay(d))});
  document.querySelectorAll('[data-dd]').forEach(b=>b.onclick=()=>delDay(b.dataset.dd))}
 function delDay(d){confirmBox('Usunąć dniówkę z '+dl(d)+' ('+zl(S.days[d])+')?',()=>{delete S.days[d];delete S.processed[d];toast('Usunięto dniówkę')})}
@@ -179,19 +179,21 @@ function vOs(){const pe=pending(),ex=S.sav.filter(e=>e.type!=='dniowka').sort((a
  const it=e=>`<div class="it"><div class="m">${esc(e.desc||(e.type==='wydatek'?'Wydatek':'Wpłata'))}<div class="s">${dshort(e.date)} · ${e.type==='wydatek'?'Wydatek':e.type==='dniowka'?'Z dniówki':e.type==='start'?'Stan przeniesiony':'Wpłata'}</div></div><div class="a ${e.type==='wydatek'?'minus':'plus'}">${e.type==='wydatek'?'-':'+'}${zl(e.amount)}</div><button class="ib" data-se="${e.id}" aria-label="Edytuj">${pen}</button><button class="ib del" data-sd="${e.id}" aria-label="Usuń">${bin}</button></div>`;
  return `<section class="card"><h2>🐷 Oszczędności</h2><div class="navy"><div class="l">Odłożona kwota</div><div class="big" id="savBal">${zl(savBal())}</div></div>
  <b>Do przelania · 25% dniówki</b><p class="hint">Przelej wyliczoną kwotę na konto oszczędnościowe, a potem wybierz „Wpłaciłam”. Kwotę możesz poprawić przed zapisaniem. Kwota aktualizuje się po dopisaniu zarobków. Wcześniej potwierdzone lub pominięte kwoty nie są naliczane ponownie.</p>
- ${pe.length?pe.map(x=>{const v=ui.pend[x.d]??r2(x.diff*.25);return `<div class="pend"><b>Dniówka z ${dl(x.d)}</b><div class="hint">${S.processed[x.d]?'Dopisane: '+zl(x.diff)+' (dniówka '+zl(S.days[x.d])+')':'Dniówka: '+zl(x.diff)}</div>
-  <label>Do przelania (zł)</label><div class="inzl"><input inputmode="decimal" data-pv="${x.d}" value="${String(v.toFixed?v.toFixed(2):v).replace('.',',')}"><span>zł</span></div>
-  <div class="row2"><button class="btn sec" data-skip="${x.d}">Nie wpłaciłam</button><button class="btn" data-paid="${x.d}">✓ Wpłaciłam</button></div></div>`}).join(''):'<div class="empty">Wszystkie dniówki rozpatrzone.</div>'}</section>
+ ${pe.length?(()=>{const tot=r2(pe.reduce((a,x)=>a+r2(x.diff*.25),0)),v=ui.pendAll||tot.toFixed(2).replace('.',',');return `<div class="pend" id="pendCard"><b>Do przelania z ${pe.length} ${pe.length===1?'dniówki':'dniówek'}</b><div class="hint">Razem 25%: ${zl(tot)}</div>
+  <label for="pendAmt">Kwota do przelania (zł)</label><div class="inzl"><input inputmode="decimal" id="pendAmt" value="${esc(v)}"><span>zł</span></div>
+  <details style="margin-top:8px"><summary>Z których dniówek? (${pe.length})</summary><div class="list">${pe.map(x=>`<div class="it" style="min-height:48px"><div class="m">${dl(x.d)}<div class="s">${S.processed[x.d]?'dopisane '+zl(x.diff)+' (dniówka '+zl(S.days[x.d])+')':'dniówka '+zl(x.diff)}</div></div><div class="a">${zl(r2(x.diff*.25))}</div></div>`).join('')}</div></details>
+  <div class="row2"><button class="btn sec" id="pendSkip">Nie wpłaciłam</button><button class="btn" id="pendPaid">✓ Wpłaciłam</button></div></div>`})():'<div class="empty">Wszystkie dniówki rozpatrzone.</div>'}</section>
  <section class="card"><h2>＋ Dodatkowa wpłata</h2><label>Kwota (zł)</label><div class="inzl"><input id="dwA" inputmode="decimal" placeholder="0,00"><span>zł</span></div><label>Opis (opcjonalnie)</label><input id="dwD" placeholder="Skąd dodatkowa wpłata?"><div class="err" id="dwE"></div><button class="btn" id="dwB">✓ Dodaj wpłatę</button></section>
  <section class="card"><h2>💸 Wydałam z oszczędności</h2><label>Kwota (zł)</label><div class="inzl"><input id="wyA" inputmode="decimal" placeholder="0,00"><span>zł</span></div><label>Na co?</label><input id="wyD" placeholder="Na co wydałaś?"><div class="err" id="wyE"></div><button class="btn" id="wyB">✓ Zapisz wydatek</button></section>
  <section class="card"><h2>Dodatkowe wpłaty i wydatki</h2><p class="hint">Wpłaty z dniówek zwiększają tylko sumę oszczędności.</p><div class="list">${ex.length?ex.map(it).join(''):'<div class="empty">Brak wpisów.</div>'}</div>
  <details style="margin-top:12px"><summary>Wpłaty z dniówek (${dn.length})</summary><div class="list">${dn.map(it).join('')||'<div class="empty">Brak.</div>'}</div></details></section>
  <section class="card"><h2>💾 Kopia zapasowa</h2><p class="hint">Dane są tylko na tym telefonie. Rób kopię co tydzień.</p>${(()=>{const l=localStorage.getItem(KEY+'-backup');return `<p class="hint" id="bkNote" style="${backupDue()?'color:#8a6d00':''}">${l?'Ostatnia kopia: '+dshort(l)+(backupDue()?' – dawno nie było kopii.':''):'Dawno nie było kopii – jeszcze ani razu.'}</p>`})()}<button class="btn" id="expB">💾 Zrób kopię</button><button class="btn sec" id="impB">⬆ Importuj kopię</button></section>`}
-function bindOs(){document.querySelectorAll('[data-pv]').forEach(i=>i.oninput=()=>ui.pend[i.dataset.pv]=i.value);
- document.querySelectorAll('[data-paid]').forEach(b=>b.onclick=()=>{const d=b.dataset.paid,v=num(document.querySelector(`[data-pv="${d}"]`).value);
-  if(isNaN(v)||v<0){toast('Podaj poprawną kwotę');return}if(v>0)S.sav.push({id:uid(),type:'dniowka',date:today(),ref:d,amount:v,desc:'25% dniówki z '+dshort(d)});
-  S.processed[d]=S.days[d];delete ui.pend[d];save();toast('Wpłacono '+zl(v));render()});
- document.querySelectorAll('[data-skip]').forEach(b=>b.onclick=()=>{const d=b.dataset.skip;S.processed[d]=S.days[d];delete ui.pend[d];save();toast('Pominięto');render()});
+function bindOs(){const pa=$('#pendAmt');if(pa){pa.oninput=()=>ui.pendAll=pa.value;
+  const mark=()=>{pending().forEach(x=>S.processed[x.d]=S.days[x.d]);delete ui.pendAll};
+  $('#pendPaid').onclick=()=>{const v=num(pa.value),ds=pending().map(x=>x.d);if(isNaN(v)||v<0){toast('Podaj poprawną kwotę');return}
+   if(v>0)S.sav.push({id:uid(),type:'dniowka',date:today(),refs:ds,amount:v,desc:ds.length===1?'25% dniówki z '+dshort(ds[0]):'25% z '+ds.length+' dniówek ('+ds.map(dshort).reverse().join(', ')+')'});
+   mark();save();toast('Wpłacono '+zl(v));render()};
+  $('#pendSkip').onclick=()=>{mark();save();toast('Pominięto');render()}}
  const addE=(type,a,dsc,er,def)=>{const v=num($(a).value);if(isNaN(v)||v<=0){$(er).textContent='Podaj poprawną kwotę, np. 12,50';return}
   const ds=$(dsc).value.trim();if(type==='wydatek'&&!ds){$(er).textContent='Napisz, na co wydałaś';return}
   S.sav.push({id:uid(),type,date:today(),amount:v,desc:ds||def});save();toast('Zapisano');render()};
