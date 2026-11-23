@@ -96,11 +96,13 @@ const cap=s=>s[0].toUpperCase()+s.slice(1);
 function seed(){return {v:1,days:{},trips:[],processed:{},sav:[],debts:[]}}
 let S;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!S.days){S=seed();save()}
+function migrate(){let dirty=false;(S.debts||[]).forEach(d=>{if(!Array.isArray(d.payments)){d.payments=[];dirty=true}if(!Array.isArray(d.additions)){d.additions=[];dirty=true}});if(dirty)save()}
+migrate();
 function save(){localStorage.setItem(KEY,JSON.stringify(S))}
 let ui={tab:localStorage.getItem(KEY+'-tab')||'dn',per:'m',ref:today(),addDate:today(),pend:{},pendAll:null};
 
 const savBal=()=>r2(S.sav.reduce((a,e)=>a+(e.type==='wydatek'?-e.amount:e.amount),0));
-const debtLeft=d=>r2(d.amount-d.payments.reduce((a,p)=>a+p.amount,0));
+const debtLeft=d=>r2((d.amount||0)-(d.payments||[]).reduce((a,p)=>a+p.amount,0));
 const tripDays=t=>Object.keys(S.days).filter(d=>d>=t.start&&(!t.end||d<=t.end));
 const activeTrip=()=>S.trips.find(t=>!t.end);
 const pending=()=>Object.keys(S.days).sort().reverse().map(d=>({d,diff:r2(S.days[d]-(S.processed[d]||0))})).filter(x=>x.diff>0);
@@ -211,30 +213,38 @@ async function exportData(){const name='moje-dniowki-kopia-'+today()+'.json',txt
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();a.remove();done();toast('Zapisano plik kopii')}
 function backupDue(){const l=localStorage.getItem(KEY+'-backup');return !l||(pd(today())-pd(l))/864e5>7}
 $('#file').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const j=JSON.parse(await f.text()),d=j.data||j;
- if(!d.days||!d.sav||!d.debts||!d.trips)throw 0;confirmBox('Zastąpić obecne dane kopią z pliku?',()=>{S=d;S.processed=S.processed||{};toast('Wczytano kopię')},'Tak, wczytaj')}catch(_){toast('To nie jest poprawny plik kopii')}};
+ if(!d.days||!d.sav||!d.debts||!d.trips)throw 0;confirmBox('Zastąpić obecne dane kopią z pliku?',()=>{S=d;S.processed=S.processed||{};migrate();toast('Wczytano kopię')},'Tak, wczytaj')}catch(_){toast('To nie jest poprawny plik kopii')}};
 
 // ---------- Długi
 function vDl(){const tot=r2(S.debts.reduce((a,d)=>a+debtLeft(d),0));
  return `<section class="card"><h2>＋ Dodaj dług</h2><label>Osoba</label><input id="dP" placeholder="Komu mam oddać?"><label>Kwota długu (zł)</label><div class="inzl"><input id="dA" inputmode="decimal" placeholder="0,00"><span>zł</span></div><div class="err" id="dE"></div><button class="btn" id="dB">＋ Dodaj dług</button></section>
  <section class="card"><h2>🤝 Długi do spłaty</h2><div class="navy"><div class="l">Łącznie pozostało</div><div class="big" id="debtTot">${zl(tot)}</div></div><p class="hint">Po spłacie całej kwoty dług znika.</p>
- ${S.debts.length?S.debts.map(d=>{const p=r2(d.payments.reduce((a,x)=>a+x.amount,0));return `<div class="debt"><div class="tophead"><b style="font-size:1.15rem">${esc(d.person)}</b><span style="display:flex;gap:8px"><button class="ib" data-de="${d.id}" aria-label="Edytuj">${pen}</button><button class="ib del" data-ddel="${d.id}" aria-label="Usuń">${bin}</button></span></div>
- <div class="big">${zl(debtLeft(d))}</div><div class="hint">Pozostało do spłaty</div><div class="hint">Dług: ${zl(d.amount)} · Wpłacono: ${zl(p)}</div>
+ ${S.debts.length?S.debts.map(d=>{const p=r2((d.payments||[]).reduce((a,x)=>a+x.amount,0)),ad=d.additions||[],as=r2(ad.reduce((a,x)=>a+x.amount,0));return `<div class="debt"><div class="tophead"><b style="font-size:1.15rem">${esc(d.person)}</b><span style="display:flex;gap:8px"><button class="ib" data-de="${d.id}" aria-label="Edytuj">${pen}</button><button class="ib del" data-ddel="${d.id}" aria-label="Usuń">${bin}</button></span></div>
+ <div class="big">${zl(debtLeft(d))}</div><div class="hint">Pozostało do spłaty</div><div class="hint">Dług: ${zl(d.amount)}${as?` · Doliczono: ${zl(as)}`:''} · Wpłacono: ${zl(p)}</div>
+ ${ad.length?`<div class="list" style="margin-top:8px">${ad.map(x=>`<div class="it"><div class="m">Doliczono<div class="s">${dshort(x.date)}</div></div><div class="a plus">${zl(x.amount)}</div><button class="ib" data-ae="${d.id}|${x.id}" aria-label="Edytuj">${pen}</button><button class="ib del" data-ad="${d.id}|${x.id}" aria-label="Usuń">${bin}</button></div>`).join('')}</div>`:''}
+ <button class="btn sec" data-dadd="${d.id}">＋ Dodaj do kwoty</button>
  ${d.payments.length?`<div class="list" style="margin-top:8px">${d.payments.map(x=>`<div class="it"><div class="m">Wpłata<div class="s">${dshort(x.date)}</div></div><div class="a">${zl(x.amount)}</div><button class="ib" data-pe="${d.id}|${x.id}" aria-label="Edytuj">${pen}</button><button class="ib del" data-pd="${d.id}|${x.id}" aria-label="Usuń">${bin}</button></div>`).join('')}</div>`:''}
  <label>Wpłata (zł)</label><div class="inzl"><input inputmode="decimal" placeholder="0,00" data-pin="${d.id}"><span>zł</span></div><button class="btn" data-pay="${d.id}">✓ Zapisz wpłatę</button></div>`}).join(''):'<div class="empty">Brak długów 🎉</div>'}</section>`}
 function bindDl(){const fd=id=>S.debts.find(x=>x.id===id),clean=()=>{const n=S.debts.length;S.debts=S.debts.filter(d=>debtLeft(d)>0);if(S.debts.length<n)toast('Dług spłacony – znika z listy')};
  $('#dB').onclick=()=>{const p=$('#dP').value.trim(),v=num($('#dA').value);if(!p){$('#dE').textContent='Wpisz, komu masz oddać';return}if(isNaN(v)||v<=0){$('#dE').textContent='Podaj poprawną kwotę';return}
-  S.debts.push({id:uid(),person:p,amount:v,payments:[]});save();toast('Dodano dług');render()};
+  S.debts.push({id:uid(),person:p,amount:v,payments:[],additions:[]});save();toast('Dodano dług');render()};
  document.querySelectorAll('[data-pay]').forEach(b=>b.onclick=()=>{const d=fd(b.dataset.pay),v=num(document.querySelector(`[data-pin="${d.id}"]`).value);
   if(isNaN(v)||v<=0){toast('Podaj poprawną kwotę');return}const go=()=>{d.payments.push({id:uid(),date:today(),amount:Math.min(v,debtLeft(d))});clean();save();render()};
   if(v>=debtLeft(d))confirmBox('To spłaca cały dług wobec '+d.person+'. Dług zniknie z listy. Kontynuować?',go,'Tak, spłacony');else{go();toast('Zapisano wpłatę '+zl(v))}});
  document.querySelectorAll('[data-de]').forEach(b=>b.onclick=()=>{const d=fd(b.dataset.de);
   form('Edytuj dług',[{k:'person',label:'Osoba',type:'text',v:d.person},{k:'amount',label:'Kwota długu (zł)',type:'money',v:d.amount}],o=>{Object.assign(d,o);clean()},()=>delDebt(d))});
+ document.querySelectorAll('[data-dadd]').forEach(b=>b.onclick=()=>{const d=fd(b.dataset.dadd);
+  form('Dodaj do długu wobec '+d.person,[{k:'amount',label:'Kwota (zł)',type:'money'},{k:'date',label:'Data',type:'date',v:today()}],o=>{d.additions=d.additions||[];d.additions.push({id:uid(),date:o.date,amount:o.amount});d.amount=r2(d.amount+o.amount);toast('Doliczono '+zl(o.amount))})});
+ document.querySelectorAll('[data-ae]').forEach(b=>b.onclick=()=>{const[di,ai]=b.dataset.ae.split('|'),d=fd(di),a=d.additions.find(x=>x.id===ai);
+  form('Edytuj doliczenie',[{k:'amount',label:'Kwota (zł)',type:'money',v:a.amount},{k:'date',label:'Data',type:'date',v:a.date}],o=>{d.amount=r2(d.amount-a.amount+o.amount);Object.assign(a,o);clean()},()=>delAdd(d,a))});
+ document.querySelectorAll('[data-ad]').forEach(b=>{const[di,ai]=b.dataset.ad.split('|'),d=fd(di);b.onclick=()=>delAdd(d,d.additions.find(x=>x.id===ai))});
  document.querySelectorAll('[data-ddel]').forEach(b=>b.onclick=()=>delDebt(fd(b.dataset.ddel)));
  document.querySelectorAll('[data-pe]').forEach(b=>b.onclick=()=>{const[di,pi]=b.dataset.pe.split('|'),d=fd(di),p=d.payments.find(x=>x.id===pi);
   form('Edytuj wpłatę',[{k:'amount',label:'Kwota (zł)',type:'money',v:p.amount},{k:'date',label:'Data',type:'date',v:p.date}],o=>{Object.assign(p,o);clean()},()=>delPay(d,p))});
  document.querySelectorAll('[data-pd]').forEach(b=>{const[di,pi]=b.dataset.pd.split('|'),d=fd(di);b.onclick=()=>delPay(d,d.payments.find(x=>x.id===pi))})}
 function delDebt(d){confirmBox('Usunąć dług wobec '+d.person+' ('+zl(debtLeft(d))+')?',()=>{S.debts=S.debts.filter(x=>x!==d);toast('Usunięto dług')})}
 function delPay(d,p){confirmBox('Usunąć wpłatę '+zl(p.amount)+'?',()=>{d.payments=d.payments.filter(x=>x!==p);toast('Usunięto wpłatę')})}
+function delAdd(d,a){confirmBox('Usunąć doliczenie '+zl(a.amount)+'?',()=>{d.additions=d.additions.filter(x=>x!==a);d.amount=r2(Math.max(0,d.amount-a.amount));const n=S.debts.length;S.debts=S.debts.filter(x=>debtLeft(x)>0);toast(S.debts.length<n?'Dług spłacony – znika z listy':'Usunięto doliczenie')})}
 
 function render(){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===ui.tab));
  const V={dn:[vDn,bindDn],wy:[vWy,bindWy],os:[vOs,bindOs],dl:[vDl,bindDl]}[ui.tab];$('#main').innerHTML=V[0]();V[1]();
