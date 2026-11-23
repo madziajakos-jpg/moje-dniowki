@@ -51,6 +51,13 @@ input:focus{outline:3px solid var(--lime);border-color:var(--navy)}
 .pend{border:1.5px solid #8bbf4f;background:#f5fbe8;border-radius:18px;padding:16px;margin-top:12px}
 .debt{border:1.5px solid var(--bd);border-radius:18px;padding:18px;margin-top:14px}
 .debt .big{font-size:2rem;font-weight:800;margin:8px 0}
+.debt-sum{cursor:pointer}
+.debt details{margin-top:4px}
+.debt details summary{justify-content:space-between;color:var(--grn);user-select:none}
+.debt details summary::-webkit-details-marker{display:none}
+.debt details summary::marker{content:''}
+.debt details summary::after{content:'▾'}
+.debt details[open] summary::after{content:'▴'}
 footer{text-align:center;color:var(--mut);font-size:.85rem;margin-top:20px}
 .modal{position:fixed;inset:0;background:#0008;display:none;align-items:flex-end;justify-content:center;z-index:9}
 .modal.open{display:flex}.modal .box{background:#fff;width:100%;max-width:620px;border-radius:22px 22px 0 0;padding:22px;max-height:92vh;overflow:auto}
@@ -99,7 +106,7 @@ if(!S||!S.days){S=seed();save()}
 function migrate(){let dirty=false;(S.debts||[]).forEach(d=>{if(!Array.isArray(d.payments)){d.payments=[];dirty=true}if(!Array.isArray(d.additions)){d.additions=[];dirty=true}});if(dirty)save()}
 migrate();
 function save(){localStorage.setItem(KEY,JSON.stringify(S))}
-let ui={tab:localStorage.getItem(KEY+'-tab')||'dn',per:'m',ref:today(),addDate:today(),pend:{},pendAll:null};
+let ui={tab:localStorage.getItem(KEY+'-tab')||'dn',per:'m',ref:today(),addDate:today(),pend:{},pendAll:null,debtOpen:{}};
 
 const savBal=()=>r2(S.sav.reduce((a,e)=>a+(e.type==='wydatek'?-e.amount:e.amount),0));
 const debtLeft=d=>r2((d.amount||0)-(d.payments||[]).reduce((a,p)=>a+p.amount,0));
@@ -220,12 +227,15 @@ function vDl(){const tot=r2(S.debts.reduce((a,d)=>a+debtLeft(d),0));
  return `<section class="card"><h2>＋ Dodaj dług</h2><label>Osoba</label><input id="dP" placeholder="Komu mam oddać?"><label>Kwota długu (zł)</label><div class="inzl"><input id="dA" inputmode="decimal" placeholder="0,00"><span>zł</span></div><div class="err" id="dE"></div><button class="btn" id="dB">＋ Dodaj dług</button></section>
  <section class="card"><h2>🤝 Długi do spłaty</h2><div class="navy"><div class="l">Łącznie pozostało</div><div class="big" id="debtTot">${zl(tot)}</div></div><p class="hint">Po spłacie całej kwoty dług znika.</p>
  ${S.debts.length?S.debts.map(d=>{const p=r2((d.payments||[]).reduce((a,x)=>a+x.amount,0)),ad=d.additions||[],as=r2(ad.reduce((a,x)=>a+x.amount,0));return `<div class="debt"><div class="tophead"><b style="font-size:1.15rem">${esc(d.person)}</b><span style="display:flex;gap:8px"><button class="ib" data-de="${d.id}" aria-label="Edytuj">${pen}</button><button class="ib del" data-ddel="${d.id}" aria-label="Usuń">${bin}</button></span></div>
- <div class="big">${zl(debtLeft(d))}</div><div class="hint">Pozostało do spłaty</div><div class="hint">Dług: ${zl(d.amount)}${as?` · Doliczono: ${zl(as)}`:''} · Wpłacono: ${zl(p)}</div>
+ <div class="debt-sum" data-dtog="${d.id}"><div class="big">${zl(debtLeft(d))}</div><div class="hint">Pozostało do spłaty</div><div class="hint">Dług: ${zl(d.amount)}${as?` · Doliczono: ${zl(as)}`:''} · Wpłacono: ${zl(p)}</div></div>
+ <details class="debt-det" data-det="${d.id}"${ui.debtOpen[d.id]?' open':''}><summary>Szczegóły</summary>
  ${ad.length?`<div class="list" style="margin-top:8px">${ad.map(x=>`<div class="it"><div class="m">Doliczono<div class="s">${dshort(x.date)}</div></div><div class="a plus">${zl(x.amount)}</div><button class="ib" data-ae="${d.id}|${x.id}" aria-label="Edytuj">${pen}</button><button class="ib del" data-ad="${d.id}|${x.id}" aria-label="Usuń">${bin}</button></div>`).join('')}</div>`:''}
  <button class="btn sec" data-dadd="${d.id}">＋ Dodaj do kwoty</button>
  ${d.payments.length?`<div class="list" style="margin-top:8px">${d.payments.map(x=>`<div class="it"><div class="m">Wpłata<div class="s">${dshort(x.date)}</div></div><div class="a">${zl(x.amount)}</div><button class="ib" data-pe="${d.id}|${x.id}" aria-label="Edytuj">${pen}</button><button class="ib del" data-pd="${d.id}|${x.id}" aria-label="Usuń">${bin}</button></div>`).join('')}</div>`:''}
- <label>Wpłata (zł)</label><div class="inzl"><input inputmode="decimal" placeholder="0,00" data-pin="${d.id}"><span>zł</span></div><button class="btn" data-pay="${d.id}">✓ Zapisz wpłatę</button></div>`}).join(''):'<div class="empty">Brak długów 🎉</div>'}</section>`}
+ <label>Wpłata (zł)</label><div class="inzl"><input inputmode="decimal" placeholder="0,00" data-pin="${d.id}"><span>zł</span></div><button class="btn" data-pay="${d.id}">✓ Zapisz wpłatę</button></details></div>`}).join(''):'<div class="empty">Brak długów 🎉</div>'}</section>`}
 function bindDl(){const fd=id=>S.debts.find(x=>x.id===id),clean=()=>{const n=S.debts.length;S.debts=S.debts.filter(d=>debtLeft(d)>0);if(S.debts.length<n)toast('Dług spłacony – znika z listy')};
+ document.querySelectorAll('[data-dtog]').forEach(el=>el.onclick=()=>{const dtl=document.querySelector(`[data-det="${el.dataset.dtog}"]`);if(dtl)dtl.open=!dtl.open});
+ document.querySelectorAll('[data-det]').forEach(el=>el.addEventListener('toggle',()=>{if(el.open)ui.debtOpen[el.dataset.det]=1;else delete ui.debtOpen[el.dataset.det]}));
  $('#dB').onclick=()=>{const p=$('#dP').value.trim(),v=num($('#dA').value);if(!p){$('#dE').textContent='Wpisz, komu masz oddać';return}if(isNaN(v)||v<=0){$('#dE').textContent='Podaj poprawną kwotę';return}
   S.debts.push({id:uid(),person:p,amount:v,payments:[],additions:[]});save();toast('Dodano dług');render()};
  document.querySelectorAll('[data-pay]').forEach(b=>b.onclick=()=>{const d=fd(b.dataset.pay),v=num(document.querySelector(`[data-pin="${d.id}"]`).value);
